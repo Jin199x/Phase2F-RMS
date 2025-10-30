@@ -345,8 +345,9 @@ namespace RECOMANAGESYS
                 cmd.Parameters.AddWithValue("@parentId", parentId.HasValue ? (object)parentId.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("@icon", isFolder ? "folder" : "file");
                 cmd.Parameters.AddWithValue("@filePath", string.IsNullOrEmpty(filePath) ? DBNull.Value : (object)filePath);
-                cmd.Parameters.AddWithValue("@created", DateTime.Now);
-                cmd.Parameters.AddWithValue("@modified", DateTime.Now);
+                DateTime now = DateTime.Now;
+                cmd.Parameters.AddWithValue("@created", now); 
+                cmd.Parameters.AddWithValue("@modified", now); 
 
                 int newId = (int)cmd.ExecuteScalar();
 
@@ -357,7 +358,9 @@ namespace RECOMANAGESYS
                     IsFolder = isFolder,
                     FilePath = filePath,
                     Parent = currentFolder,
-                    ParentId = parentId
+                    ParentId = parentId,
+                    CreatedAt = now,   
+                    ModifiedAt = now
                 };
 
                 if (currentFolder == null)
@@ -698,6 +701,8 @@ namespace RECOMANAGESYS
 
         private void RenameItem(DesktopItem item, string newName)
         {
+            DateTime now = DateTime.Now; 
+
             using (SqlConnection conn = DatabaseHelper.GetConnection())
             {
                 conn.Open();
@@ -707,13 +712,14 @@ namespace RECOMANAGESYS
                 );
                 cmd.Parameters.AddWithValue("@name", newName);
                 cmd.Parameters.AddWithValue("@id", item.ItemId);
-                cmd.Parameters.AddWithValue("@modified", DateTime.Now);
+                cmd.Parameters.AddWithValue("@modified", now); 
+
                 cmd.ExecuteNonQuery();
             }
 
             item.Name = newName;
+            item.ModifiedAt = now; 
         }
-
         private void DeleteItem(DesktopItem item)
         {
             using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -807,7 +813,9 @@ namespace RECOMANAGESYS
                                 Name = (string)reader["Name"],
                                 IsFolder = (bool)reader["IsFolder"],
                                 FilePath = reader["FilePath"] == DBNull.Value ? null : (string)reader["FilePath"],
-                                ParentId = reader["ParentId"] == DBNull.Value ? null : (int?)reader["ParentId"]
+                                ParentId = reader["ParentId"] == DBNull.Value ? null : (int?)reader["ParentId"],
+                                CreatedAt = (DateTime)reader["CreatedAt"],   
+                                ModifiedAt = (DateTime)reader["ModifiedAt"]
                             };
                             results.Add(item);
                         }
