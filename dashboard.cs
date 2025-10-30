@@ -230,5 +230,14 @@ namespace RECOMANAGESYS
                     break;
             }
         }
+        protected override CreateParams CreateParams //minimize using the taskbar
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.Style |= 0x20000;
+                return cp;
+            }
+        }
     }
 }

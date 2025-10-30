@@ -38,6 +38,7 @@
             this.hide = new System.Windows.Forms.Button();
             this.unhide = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
+            this.btnMinimize = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -46,9 +47,9 @@
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.label1.Location = new System.Drawing.Point(671, 243);
+            this.label1.Location = new System.Drawing.Point(755, 304);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(115, 27);
+            this.label1.Size = new System.Drawing.Size(137, 31);
             this.label1.TabIndex = 0;
             this.label1.Text = "Username";
             // 
@@ -58,9 +59,9 @@
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.label2.Location = new System.Drawing.Point(671, 329);
+            this.label2.Location = new System.Drawing.Point(755, 411);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(108, 27);
+            this.label2.Size = new System.Drawing.Size(130, 31);
             this.label2.TabIndex = 1;
             this.label2.Text = "Password";
             // 
@@ -70,9 +71,9 @@
             this.lbForgotPass.BackColor = System.Drawing.Color.Transparent;
             this.lbForgotPass.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbForgotPass.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.lbForgotPass.Location = new System.Drawing.Point(777, 408);
+            this.lbForgotPass.Location = new System.Drawing.Point(874, 510);
             this.lbForgotPass.Name = "lbForgotPass";
-            this.lbForgotPass.Size = new System.Drawing.Size(153, 23);
+            this.lbForgotPass.Size = new System.Drawing.Size(190, 28);
             this.lbForgotPass.TabIndex = 2;
             this.lbForgotPass.Text = "Forgot Password?";
             this.lbForgotPass.Click += new System.EventHandler(this.lbForgotPass_Click);
@@ -81,10 +82,11 @@
             // 
             this.txtusername.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtusername.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtusername.Location = new System.Drawing.Point(676, 273);
+            this.txtusername.Location = new System.Drawing.Point(760, 341);
+            this.txtusername.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtusername.Multiline = true;
             this.txtusername.Name = "txtusername";
-            this.txtusername.Size = new System.Drawing.Size(341, 43);
+            this.txtusername.Size = new System.Drawing.Size(383, 53);
             this.txtusername.TabIndex = 5;
             // 
             // txtpassword
@@ -92,11 +94,12 @@
             this.txtpassword.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtpassword.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtpassword.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.txtpassword.Location = new System.Drawing.Point(676, 359);
+            this.txtpassword.Location = new System.Drawing.Point(760, 449);
+            this.txtpassword.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtpassword.Multiline = true;
             this.txtpassword.Name = "txtpassword";
             this.txtpassword.PasswordChar = '*';
-            this.txtpassword.Size = new System.Drawing.Size(341, 43);
+            this.txtpassword.Size = new System.Drawing.Size(383, 53);
             this.txtpassword.TabIndex = 6;
             // 
             // btnlogin
@@ -106,9 +109,10 @@
             this.btnlogin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnlogin.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnlogin.ForeColor = System.Drawing.Color.White;
-            this.btnlogin.Location = new System.Drawing.Point(788, 471);
+            this.btnlogin.Location = new System.Drawing.Point(886, 589);
+            this.btnlogin.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnlogin.Name = "btnlogin";
-            this.btnlogin.Size = new System.Drawing.Size(120, 44);
+            this.btnlogin.Size = new System.Drawing.Size(135, 55);
             this.btnlogin.TabIndex = 7;
             this.btnlogin.Text = "Login ";
             this.btnlogin.UseVisualStyleBackColor = false;
@@ -119,9 +123,10 @@
             this.hide.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("hide.BackgroundImage")));
             this.hide.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.hide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.hide.Location = new System.Drawing.Point(967, 359);
+            this.hide.Location = new System.Drawing.Point(1088, 449);
+            this.hide.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.hide.Name = "hide";
-            this.hide.Size = new System.Drawing.Size(50, 43);
+            this.hide.Size = new System.Drawing.Size(56, 54);
             this.hide.TabIndex = 8;
             this.hide.UseVisualStyleBackColor = true;
             this.hide.Click += new System.EventHandler(this.hide_Click);
@@ -131,9 +136,10 @@
             this.unhide.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("unhide.BackgroundImage")));
             this.unhide.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.unhide.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.unhide.Location = new System.Drawing.Point(967, 359);
+            this.unhide.Location = new System.Drawing.Point(1088, 449);
+            this.unhide.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.unhide.Name = "unhide";
-            this.unhide.Size = new System.Drawing.Size(50, 43);
+            this.unhide.Size = new System.Drawing.Size(56, 54);
             this.unhide.TabIndex = 9;
             this.unhide.UseVisualStyleBackColor = true;
             this.unhide.Click += new System.EventHandler(this.unhide_Click);
@@ -142,22 +148,36 @@
             // 
             this.btnExit.BackColor = System.Drawing.Color.Red;
             this.btnExit.ForeColor = System.Drawing.Color.White;
-            this.btnExit.Location = new System.Drawing.Point(1207, 10);
+            this.btnExit.Location = new System.Drawing.Point(1365, 0);
             this.btnExit.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(25, 22);
+            this.btnExit.Size = new System.Drawing.Size(28, 28);
             this.btnExit.TabIndex = 10;
             this.btnExit.Text = "X";
             this.btnExit.UseVisualStyleBackColor = false;
             this.btnExit.Click += new System.EventHandler(this.button1_Click);
             // 
+            // btnMinimize
+            // 
+            this.btnMinimize.BackColor = System.Drawing.Color.RoyalBlue;
+            this.btnMinimize.ForeColor = System.Drawing.Color.White;
+            this.btnMinimize.Location = new System.Drawing.Point(1340, 0);
+            this.btnMinimize.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnMinimize.Name = "btnMinimize";
+            this.btnMinimize.Size = new System.Drawing.Size(28, 28);
+            this.btnMinimize.TabIndex = 11;
+            this.btnMinimize.Text = "-";
+            this.btnMinimize.UseVisualStyleBackColor = false;
+            this.btnMinimize.Click += new System.EventHandler(this.btnMinimize_Click);
+            // 
             // loginform
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(1243, 702);
+            this.ClientSize = new System.Drawing.Size(1398, 878);
+            this.Controls.Add(this.btnMinimize);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.unhide);
             this.Controls.Add(this.hide);
@@ -168,6 +188,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "loginform";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Load += new System.EventHandler(this.loginform_Load);
@@ -187,6 +208,7 @@
         private System.Windows.Forms.Button hide;
         private System.Windows.Forms.Button unhide;
         private System.Windows.Forms.Button btnExit;
+        private System.Windows.Forms.Button btnMinimize;
     }
 }
 

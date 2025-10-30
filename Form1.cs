@@ -317,5 +317,18 @@ namespace RECOMANAGESYS
         {
             Application.Exit();
         }
+        private void btnMinimize_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+        protected override CreateParams CreateParams //minimize in taskbar
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+                cp.Style |= 0x20000;
+                return cp;
+            }
+        }
     }
 }
