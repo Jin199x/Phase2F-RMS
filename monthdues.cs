@@ -54,7 +54,6 @@ namespace RECOMANAGESYS
             lvResidents.Columns.Add("Owner's Full Name", 200);
             lvResidents.Columns.Add("Address", 350);
             lvResidents.Columns.Add("Total Paid", 100);
-            // lvResidents.Columns.Add("Total Missed", 100);
             lvResidents.Columns.Add("Unit Type", 120);
             lvResidents.Columns.Add("Status", 100);
 
@@ -143,53 +142,58 @@ namespace RECOMANAGESYS
             using (SqlConnection conn = DatabaseHelper.GetConnection())
             {
                 string query = @"
-        WITH UnitPaymentSummary AS (
-            SELECT
-                UnitID,
-                SUM(AmountPaid) AS TotalPaid,
-                MIN(CONVERT(DATETIME, '01 ' + MonthCovered)) AS FirstPaymentDate,
-                COUNT(DISTINCT MonthCovered) AS PaidMonthsCount 
-            FROM MonthlyDues
-            GROUP BY UnitID
-        )
+    WITH UnitPaymentSummary AS (
         SELECT
-            u.UnitID, u.UnitNumber, u.Block, u.UnitType,
-            r_owner.HomeAddress,
-            ISNULL(ups.TotalPaid, 0) AS TotalPaid,
-            CASE
-                WHEN COALESCE(hu_owner.DateOfOwnership, ups.FirstPaymentDate) IS NOT NULL
-                THEN (DATEDIFF(month, COALESCE(hu_owner.DateOfOwnership, ups.FirstPaymentDate), GETDATE()) + 1) - ISNULL(ups.PaidMonthsCount, 0)
-                ELSE 0
-            END AS TotalMissed,
-            r_owner.ResidentID,
-            r_owner.HomeownerID,
-            COALESCE(r_owner.FirstName + ' ' + r_owner.MiddleName + ' ' + r_owner.LastName, 'Currently no owner') AS FullName,
-            CASE 
-                WHEN r_owner.ResidentID IS NOT NULL AND r_owner.IsActive = 1 THEN 1 
-                ELSE 0 
-            END AS EffectiveIsActive
-        FROM TBL_Units u
-        LEFT JOIN UnitPaymentSummary ups ON u.UnitID = ups.UnitID
-        LEFT JOIN HomeownerUnits hu_owner ON u.UnitID = hu_owner.UnitID AND hu_owner.IsCurrent = 1
-        LEFT JOIN Residents r_owner ON hu_owner.ResidentID = r_owner.ResidentID AND r_owner.ResidencyType = 'Owner'
-        WHERE
-            (
-                (@isActive IS NULL AND (
-                    (r_owner.ResidentID IS NOT NULL AND r_owner.IsActive = 1)
-                    OR 
-                    (NOT EXISTS (
-                        SELECT 1 FROM HomeownerUnits hu_check JOIN Residents r_check ON hu_check.ResidentID = r_check.ResidentID
-                        WHERE hu_check.UnitID = u.UnitID AND hu_check.IsCurrent = 1 AND r_check.IsActive = 1
-                    ))
-                )) OR
-                (@isActive = 1 AND r_owner.ResidentID IS NOT NULL AND r_owner.IsActive = 1) OR
-                (@isActive = 0 AND NOT EXISTS (
+            UnitID,
+            SUM(AmountPaid) AS TotalPaid,
+            MIN(CONVERT(DATETIME, '01 ' + MonthCovered)) AS FirstPaymentDate,
+            COUNT(DISTINCT MonthCovered) AS PaidMonthsCount 
+        FROM MonthlyDues
+        GROUP BY UnitID
+    )
+    SELECT
+        u.UnitID, u.UnitNumber, u.Block, u.UnitType,
+        r_owner.HomeAddress,
+        ISNULL(ups.TotalPaid, 0) AS TotalPaid,
+        CASE
+            WHEN COALESCE(hu_owner.DateOfOwnership, ups.FirstPaymentDate) IS NOT NULL
+            THEN (DATEDIFF(month, COALESCE(hu_owner.DateOfOwnership, ups.FirstPaymentDate), GETDATE()) + 1) - ISNULL(ups.PaidMonthsCount, 0)
+            ELSE 0
+        END AS TotalMissed,
+        r_owner.ResidentID,
+        r_owner.HomeownerID,
+        COALESCE(
+            r_owner.FirstName + ' ' + 
+            ISNULL(r_owner.MiddleName + ' ', '') + 
+            r_owner.LastName, 
+            'Currently no owner'
+        ) AS FullName,
+        CASE 
+            WHEN r_owner.ResidentID IS NOT NULL AND r_owner.IsActive = 1 THEN 1 
+            ELSE 0 
+        END AS EffectiveIsActive
+    FROM TBL_Units u
+    LEFT JOIN UnitPaymentSummary ups ON u.UnitID = ups.UnitID
+    LEFT JOIN HomeownerUnits hu_owner ON u.UnitID = hu_owner.UnitID AND hu_owner.IsCurrent = 1
+    LEFT JOIN Residents r_owner ON hu_owner.ResidentID = r_owner.ResidentID AND r_owner.ResidencyType = 'Owner'
+    WHERE
+        (
+            (@isActive IS NULL AND (
+                (r_owner.ResidentID IS NOT NULL AND r_owner.IsActive = 1)
+                OR 
+                (NOT EXISTS (
                     SELECT 1 FROM HomeownerUnits hu_check JOIN Residents r_check ON hu_check.ResidentID = r_check.ResidentID
                     WHERE hu_check.UnitID = u.UnitID AND hu_check.IsCurrent = 1 AND r_check.IsActive = 1
                 ))
-            )
-            AND (@keyword IS NULL OR (r_owner.FirstName LIKE @keyword OR r_owner.LastName LIKE @keyword OR r_owner.HomeownerID LIKE @keyword OR u.UnitNumber LIKE @keyword OR u.Block LIKE @keyword))
-        ORDER BY u.Block, u.UnitNumber";
+            )) OR
+            (@isActive = 1 AND r_owner.ResidentID IS NOT NULL AND r_owner.IsActive = 1) OR
+            (@isActive = 0 AND NOT EXISTS (
+                SELECT 1 FROM HomeownerUnits hu_check JOIN Residents r_check ON hu_check.ResidentID = r_check.ResidentID
+                WHERE hu_check.UnitID = u.UnitID AND hu_check.IsCurrent = 1 AND r_check.IsActive = 1
+            ))
+        )
+        AND (@keyword IS NULL OR (r_owner.FirstName LIKE @keyword OR r_owner.LastName LIKE @keyword OR r_owner.HomeownerID LIKE @keyword OR u.UnitNumber LIKE @keyword OR u.Block LIKE @keyword))
+    ORDER BY u.Block, u.UnitNumber";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -211,19 +215,13 @@ namespace RECOMANAGESYS
                             string unitType = reader["UnitType"].ToString();
                             decimal totalPaid = Convert.ToDecimal(reader["TotalPaid"]);
                             int totalMissed = Convert.ToInt32(reader["TotalMissed"]);
-
-                            string residentHomeAddress = reader["HomeAddress"] == DBNull.Value ? "" : reader["HomeAddress"].ToString();
-                            string formattedAddress = string.IsNullOrWhiteSpace(residentHomeAddress)
-                                ? $"Unit {unitNumber} Block {block}"
-                                : $"Unit {unitNumber} Block {block}, {residentHomeAddress}";
-
+                            string formattedAddress = $"Unit {unitNumber} Block {block}, Phase 2F, Mabuhay 2000 Brgy Dila, Santa Rosa Laguna";
                             homeownerToResidentIdMap[homeownerId] = residentId;
 
                             ListViewItem item = new ListViewItem(homeownerId == 0 ? "N/A" : homeownerId.ToString());
                             item.SubItems.Add(fullName);
                             item.SubItems.Add(formattedAddress);
                             item.SubItems.Add(totalPaid.ToString("F2"));
-                            //item.SubItems.Add(Math.Max(0, totalMissed) > 0 ? Math.Max(0, totalMissed).ToString() : "");
                             item.SubItems.Add(unitType);
                             item.SubItems.Add(effectiveStatus ? "Active" : "Inactive");
 
@@ -288,9 +286,9 @@ namespace RECOMANAGESYS
                     }
 
                     paymentQuery = @"SELECT MonthCovered, PaymentDate, AmountPaid, PaidByResidencyType, PaidByResidentName 
-                             FROM MonthlyDues 
-                             WHERE ResidentID=@residentId AND UnitID=@unitId 
-                             ORDER BY CONVERT(DATETIME, '01 ' + MonthCovered)";
+                                     FROM MonthlyDues 
+                                     WHERE ResidentID=@residentId AND UnitID=@unitId 
+                                     ORDER BY CONVERT(DATETIME, '01 ' + MonthCovered)";
                     cmd.Parameters.AddWithValue("@residentId", residentId);
                 }
                 else
@@ -307,9 +305,9 @@ namespace RECOMANAGESYS
                     }
 
                     paymentQuery = @"SELECT MonthCovered, PaymentDate, AmountPaid, PaidByResidencyType, PaidByResidentName 
-                             FROM MonthlyDues 
-                             WHERE UnitID=@unitId 
-                             ORDER BY CONVERT(DATETIME, '01 ' + MonthCovered)";
+                                     FROM MonthlyDues 
+                                     WHERE UnitID=@unitId 
+                                     ORDER BY CONVERT(DATETIME, '01 ' + MonthCovered)";
                 }
 
                 cmd.CommandText = paymentQuery;
@@ -406,7 +404,20 @@ namespace RECOMANAGESYS
                         if (reader.Read())
                         {
                             homeownerId = reader["HomeownerID"].ToString();
-                            fullName = $"{reader["FirstName"]} {reader["MiddleName"]} {reader["LastName"]}";
+
+                            string fname = reader["FirstName"].ToString();
+                            string mname = reader["MiddleName"] == DBNull.Value ? "" : reader["MiddleName"].ToString();
+                            string lname = reader["LastName"].ToString();
+
+                            if (!string.IsNullOrWhiteSpace(mname))
+                            {
+                                fullName = $"{fname} {mname} {lname}";
+                            }
+                            else
+                            {
+                                fullName = $"{fname} {lname}";
+                            }
+
                             baseHomeAddress = reader["HomeAddress"].ToString();
                             contact = reader["ContactNumber"].ToString();
                         }
@@ -428,12 +439,13 @@ namespace RECOMANAGESYS
                     }
                 }
 
-                formattedAddress = $"Unit {unitNumber} Block {block}, {baseHomeAddress}";
+                // --- MODIFICATION 2 (for RDLC Report) ---
+                formattedAddress = $"Unit {unitNumber} Block {block}" + Environment.NewLine + "Phase 2F" + Environment.NewLine + "Mabuhay 2000 Brgy Dila, Santa Rosa Laguna";
 
                 string paymentQuery = @"SELECT MonthCovered, AmountPaid 
-                                        FROM MonthlyDues 
-                                        WHERE ResidentID=@residentId AND UnitID = @unitId
-                                        ORDER BY CONVERT(DATETIME, '01 ' + MonthCovered)";
+                                          FROM MonthlyDues 
+                                          WHERE ResidentID=@residentId AND UnitID = @unitId
+                                          ORDER BY CONVERT(DATETIME, '01 ' + MonthCovered)";
                 using (SqlCommand cmdPayments = new SqlCommand(paymentQuery, conn))
                 {
                     cmdPayments.Parameters.AddWithValue("@residentId", residentId);

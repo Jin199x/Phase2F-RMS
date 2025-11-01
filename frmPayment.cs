@@ -53,7 +53,6 @@ namespace RECOMANAGESYS
             this.txtChange.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtNumeric_KeyPress);
             this.dtpPaymentDate.ValueChanged += new System.EventHandler(this.dtpPaymentDate_ValueChanged);
             this.clbAdvanceMonths.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.clbAdvanceMonths_ItemCheck);
-            // this.btnToggleSelectAll.Click += new System.EventHandler(this.btnToggleSelectAll_Click);
         }
 
         private void txtNumeric_KeyPress(object sender, KeyPressEventArgs e)
@@ -112,8 +111,8 @@ namespace RECOMANAGESYS
             {
                 conn.Open();
                 string residentQuery = @"SELECT ResidentID, FirstName, MiddleName, LastName, HomeAddress, IsActive 
-                                 FROM Residents 
-                                 WHERE HomeownerID = @homeownerId AND ResidencyType = 'Owner'";
+                                         FROM Residents 
+                                         WHERE HomeownerID = @homeownerId AND ResidencyType = 'Owner'";
                 using (SqlCommand cmd = new SqlCommand(residentQuery, conn))
                 {
                     cmd.Parameters.AddWithValue("@homeownerId", homeownerId);
@@ -132,10 +131,17 @@ namespace RECOMANAGESYS
                             return false;
                         }
                         currentOwnerResidentId = Convert.ToInt32(reader["ResidentID"]);
-                        ownerFullName = $"{reader["FirstName"]} {reader["MiddleName"]} {reader["LastName"]}";
-                        homeAddress = reader["HomeAddress"].ToString();
+
+                        // --- MIDDLE NAME FIX 1 (Applied) ---
+                        string fname = reader["FirstName"].ToString();
+                        string mname = reader["MiddleName"] == DBNull.Value ? "" : reader["MiddleName"].ToString();
+                        string lname = reader["LastName"].ToString();
+                        ownerFullName = string.IsNullOrWhiteSpace(mname) ? $"{fname} {lname}" : $"{fname} {mname} {lname}";
+
+                        homeAddress = reader["HomeAddress"].ToString(); // We still grab this, but we don't use it
                         lblResidentName.Text = ownerFullName;
-                        lblResidentAddress.Text = homeAddress;
+
+                        lblResidentAddress.Text = ""; // Set to blank as requested
                     }
                 }
             }
@@ -171,26 +177,26 @@ namespace RECOMANAGESYS
                 if (payerType == "Owner")
                 {
                     query = @"SELECT u.UnitID, u.UnitNumber, u.IsOccupied, u.Block, u.UnitType, u.TotalRooms, 
-                        (SELECT COUNT(*) FROM HomeownerUnits hu_c JOIN Residents r_c ON hu_c.ResidentID = r_c.ResidentID WHERE hu_c.UnitID = u.UnitID AND hu_c.IsCurrent = 1 AND r_c.IsActive = 1 AND r_c.ResidencyType != 'Owner') AS OccupantCount
-                      FROM HomeownerUnits hu
-                      INNER JOIN TBL_Units u ON hu.UnitID = u.UnitID
-                      WHERE hu.ResidentID = @ownerResidentId AND hu.IsCurrent = 1";
+                                (SELECT COUNT(*) FROM HomeownerUnits hu_c JOIN Residents r_c ON hu_c.ResidentID = r_c.ResidentID WHERE hu_c.UnitID = u.UnitID AND hu_c.IsCurrent = 1 AND r_c.IsActive = 1 AND r_c.ResidencyType != 'Owner') AS OccupantCount
+                              FROM HomeownerUnits hu
+                              INNER JOIN TBL_Units u ON hu.UnitID = u.UnitID
+                              WHERE hu.ResidentID = @ownerResidentId AND hu.IsCurrent = 1";
                 }
                 else
                 {
                     query = @"SELECT u.UnitID, u.UnitNumber, u.IsOccupied, u.Block, u.UnitType, u.TotalRooms,
-                        (SELECT COUNT(*) FROM HomeownerUnits hu_c JOIN Residents r_c ON hu_c.ResidentID = r_c.ResidentID WHERE hu_c.UnitID = u.UnitID AND hu_c.IsCurrent = 1 AND r_c.IsActive = 1 AND r_c.ResidencyType != 'Owner') AS OccupantCount
-                      FROM TBL_Units u
-                      JOIN HomeownerUnits hu_owner ON u.UnitID = hu_owner.UnitID
-                      WHERE hu_owner.ResidentID = @ownerResidentId AND hu_owner.IsCurrent = 1
-                      AND EXISTS (
-                          SELECT 1
-                          FROM HomeownerUnits hu_other
-                          JOIN Residents r_other ON hu_other.ResidentID = r_other.ResidentID
-                          WHERE hu_other.UnitID = u.UnitID
-                            AND r_other.ResidencyType = @payerType
-                            AND r_other.IsActive = 1
-                      )";
+                                (SELECT COUNT(*) FROM HomeownerUnits hu_c JOIN Residents r_c ON hu_c.ResidentID = r_c.ResidentID WHERE hu_c.UnitID = u.UnitID AND hu_c.IsCurrent = 1 AND r_c.IsActive = 1 AND r_c.ResidencyType != 'Owner') AS OccupantCount
+                              FROM TBL_Units u
+                              JOIN HomeownerUnits hu_owner ON u.UnitID = hu_owner.UnitID
+                              WHERE hu_owner.ResidentID = @ownerResidentId AND hu_owner.IsCurrent = 1
+                              AND EXISTS (
+                                  SELECT 1
+                                  FROM HomeownerUnits hu_other
+                                  JOIN Residents r_other ON hu_other.ResidentID = r_other.ResidentID
+                                  WHERE hu_other.UnitID = u.UnitID
+                                    AND r_other.ResidencyType = @payerType
+                                    AND r_other.IsActive = 1
+                              )";
                 }
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -253,7 +259,9 @@ namespace RECOMANAGESYS
             string unitNumber = selectedUnit.Item2;
             string block = selectedUnit.Item4;
 
-            lblResidentAddress.Text = $"Unit {unitNumber} Block {block}{Environment.NewLine}{homeAddress}";
+            // --- CHANGE 1: Set form label to ONLY unit and block ---
+            lblResidentAddress.Text = $"Unit {unitNumber} Block {block}";
+
             UpdateUnitStatusLabel();
 
             lblDueRate.Text = BaseDueRate.ToString("N2");
@@ -345,7 +353,6 @@ namespace RECOMANAGESYS
             }
             UpdateAmountPaidLabel();
             UpdateMonthCoveredLabel();
-            //UpdateToggleSelectAllButtonText();
         }
 
         private void dtpPaymentDate_ValueChanged(object sender, EventArgs e)
@@ -365,7 +372,6 @@ namespace RECOMANAGESYS
 
             UpdateAmountPaidLabel();
             UpdateMonthCoveredLabel();
-            // UpdateToggleSelectAllButtonText();
         }
         private void clbAdvanceMonths_ItemCheck(object sender, ItemCheckEventArgs e)
         {
@@ -393,7 +399,6 @@ namespace RECOMANAGESYS
             {
                 UpdateAmountPaidLabel();
                 UpdateMonthCoveredLabel();
-                // UpdateToggleSelectAllButtonText();
             }));
         }
 
@@ -428,8 +433,12 @@ namespace RECOMANAGESYS
                             {
                                 while (reader.Read())
                                 {
-                                    string name = $"{reader["FirstName"]} {reader["MiddleName"]} {reader["LastName"]}";
-                                    cmbNames.Items.Add(name.Trim());
+                                    // --- MIDDLE NAME FIX 2 (Applied) ---
+                                    string fname = reader["FirstName"].ToString();
+                                    string mname = reader["MiddleName"] == DBNull.Value ? "" : reader["MiddleName"].ToString();
+                                    string lname = reader["LastName"].ToString();
+                                    string fullName = string.IsNullOrWhiteSpace(mname) ? $"{fname} {lname}" : $"{fname} {mname} {lname}";
+                                    cmbNames.Items.Add(fullName);
                                 }
                             }
                         }
@@ -601,19 +610,20 @@ namespace RECOMANAGESYS
                     monthCoveredForReceipt = $"{firstMonth} - {lastMonth}";
                 }
 
+                // --- CHANGE 2: Pass the correct address (Unit + Block only) to the receipt ---
                 var parameters = new ReportParameter[]
-
                 {
-            new ReportParameter("txtResidentName", lblResidentName.Text),
-            new ReportParameter("txtHomeownerID", txtHomeownerIDDisplay.Text),
-            new ReportParameter("txtPayment", txtPaid.Text),
-            new ReportParameter("txtChange", changeAmountForReport),
-            new ReportParameter("txtAmountCovered", lblAmountPaid.Text),    
-            new ReportParameter("txtMonthCovered", monthCoveredForReceipt), 
-            new ReportParameter("txtRemarks", cmbRemarks.Text),
-            new ReportParameter("txtDate", DateTime.Now.ToString("MMMM dd, yyyy, hh:mm tt")),
-            new ReportParameter("txtOfficerName", CurrentUser.FullName),
-            new ReportParameter("txtOfficerPosition", CurrentUser.Role)
+                    new ReportParameter("txtResidentName", lblResidentName.Text),
+                    new ReportParameter("txtHomeownerID", txtHomeownerIDDisplay.Text),
+                    new ReportParameter("txtAddress", lblResidentAddress.Text), // This now correctly sends "Unit X Block Y"
+                    new ReportParameter("txtPayment", txtPaid.Text),
+                    new ReportParameter("txtChange", changeAmountForReport),
+                    new ReportParameter("txtAmountCovered", lblAmountPaid.Text),
+                    new ReportParameter("txtMonthCovered", monthCoveredForReceipt),
+                    new ReportParameter("txtRemarks", cmbRemarks.Text),
+                    new ReportParameter("txtDate", DateTime.Now.ToString("MMMM dd, yyyy, hh:mm tt")),
+                    new ReportParameter("txtOfficerName", CurrentUser.FullName),
+                    new ReportParameter("txtOfficerPosition", CurrentUser.Role)
                 };
                 reportViewer.LocalReport.SetParameters(parameters);
                 reportViewer.RefreshReport();
@@ -663,28 +673,7 @@ namespace RECOMANAGESYS
 
             UpdateAmountPaidLabel();
             UpdateMonthCoveredLabel();
-            // UpdateToggleSelectAllButtonText();
         }
-        /* private void UpdateToggleSelectAllButtonText()
-        {
-            if (clbAdvanceMonths.Items.Count == 0)
-            {
-                btnToggleSelectAll.Enabled = false;
-                btnToggleSelectAll.Text = "Select All";
-            }
-            else
-            {
-                btnToggleSelectAll.Enabled = true;
-                if (clbAdvanceMonths.CheckedItems.Count == clbAdvanceMonths.Items.Count)
-                {
-                    btnToggleSelectAll.Text = "Deselect All";
-                }
-                else
-                {
-                    btnToggleSelectAll.Text = "Select All";
-                }
-            }
-        }*/
 
         private void btnCancel_Click(object sender, EventArgs e) { this.Close(); }
 

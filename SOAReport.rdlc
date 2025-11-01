@@ -676,7 +676,7 @@
             <Top>1.4861in</Top>
             <Left>0.19667in</Left>
             <Height>0.19444in</Height>
-            <Width>1.69222in</Width>
+            <Width>2.48166in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -689,7 +689,6 @@
             </Style>
           </Textbox>
           <Textbox Name="txtAddress">
-            <CanGrow>true</CanGrow>
             <KeepTogether>true</KeepTogether>
             <Paragraphs>
               <Paragraph>
@@ -706,8 +705,8 @@
             </Paragraphs>
             <Top>1.69443in</Top>
             <Left>0.19667in</Left>
-            <Height>0.19444in</Height>
-            <Width>1.69222in</Width>
+            <Height>0.52083in</Height>
+            <Width>4.14946in</Width>
             <ZIndex>3</ZIndex>
             <Style>
               <Border>
@@ -735,10 +734,10 @@
                 <Style />
               </Paragraph>
             </Paragraphs>
-            <Top>1.90276in</Top>
+            <Top>2.21526in</Top>
             <Left>0.19667in</Left>
             <Height>0.19444in</Height>
-            <Width>1.69222in</Width>
+            <Width>2.48166in</Width>
             <ZIndex>4</ZIndex>
             <Style>
               <Border>
@@ -1064,7 +1063,7 @@
                 </Style>
               </Paragraph>
             </Paragraphs>
-            <Top>1.87498in</Top>
+            <Top>1.86109in</Top>
             <Left>6.87836in</Left>
             <Height>0.19444in</Height>
             <Width>1.07417in</Width>
