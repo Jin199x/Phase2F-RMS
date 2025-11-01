@@ -585,26 +585,41 @@ namespace RECOMANAGESYS
                 receipt.Controls.Add(reportViewer);
                 reportViewer.LocalReport.ReportEmbeddedResource = "RECOMANAGESYS.PaymentReceipt.rdlc";
                 string changeAmountForReport = txtChange.Text;
+                string monthCoveredForReceipt = "";
+                if (clbAdvanceMonths.CheckedItems.Count == 0)
+                {
+                    monthCoveredForReceipt = "No months selected";
+                }
+                else if (clbAdvanceMonths.CheckedItems.Count == 1)
+                {
+                    monthCoveredForReceipt = clbAdvanceMonths.CheckedItems[0].ToString();
+                }
+                else
+                {
+                    string firstMonth = clbAdvanceMonths.CheckedItems[0].ToString();
+                    string lastMonth = clbAdvanceMonths.CheckedItems[clbAdvanceMonths.CheckedItems.Count - 1].ToString();
+                    monthCoveredForReceipt = $"{firstMonth} - {lastMonth}";
+                }
 
                 var parameters = new ReportParameter[]
+
                 {
-                    new ReportParameter("txtResidentName", lblResidentName.Text),
-                    new ReportParameter("txtHomeownerID", txtHomeownerIDDisplay.Text),
-                    new ReportParameter("txtPayment", txtPaid.Text),
-                    new ReportParameter("txtChange", changeAmountForReport),
-                    new ReportParameter("txtAmountCovered", lblAmountPaid.Text),
-                    new ReportParameter("txtMonthCovered", lblMonthCovered.Text),
-                    new ReportParameter("txtRemarks", cmbRemarks.Text),
-                    new ReportParameter("txtDate", DateTime.Now.ToString("MMMM dd, yyyy, hh:mm tt")),
-                    new ReportParameter("txtOfficerName", CurrentUser.FullName),
-                    new ReportParameter("txtOfficerPosition", CurrentUser.Role)
+            new ReportParameter("txtResidentName", lblResidentName.Text),
+            new ReportParameter("txtHomeownerID", txtHomeownerIDDisplay.Text),
+            new ReportParameter("txtPayment", txtPaid.Text),
+            new ReportParameter("txtChange", changeAmountForReport),
+            new ReportParameter("txtAmountCovered", lblAmountPaid.Text),    
+            new ReportParameter("txtMonthCovered", monthCoveredForReceipt), 
+            new ReportParameter("txtRemarks", cmbRemarks.Text),
+            new ReportParameter("txtDate", DateTime.Now.ToString("MMMM dd, yyyy, hh:mm tt")),
+            new ReportParameter("txtOfficerName", CurrentUser.FullName),
+            new ReportParameter("txtOfficerPosition", CurrentUser.Role)
                 };
                 reportViewer.LocalReport.SetParameters(parameters);
                 reportViewer.RefreshReport();
                 receipt.ShowDialog();
             }
         }
-
         private void UpdateAmountPaidLabel()
         {
             lblAmountPaid.Text = (clbAdvanceMonths.CheckedItems.Count * BaseDueRate).ToString("F2");
