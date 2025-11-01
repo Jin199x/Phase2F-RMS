@@ -131,17 +131,10 @@ namespace RECOMANAGESYS
                             return false;
                         }
                         currentOwnerResidentId = Convert.ToInt32(reader["ResidentID"]);
-
-                        // --- MIDDLE NAME FIX 1 (Applied) ---
-                        string fname = reader["FirstName"].ToString();
-                        string mname = reader["MiddleName"] == DBNull.Value ? "" : reader["MiddleName"].ToString();
-                        string lname = reader["LastName"].ToString();
-                        ownerFullName = string.IsNullOrWhiteSpace(mname) ? $"{fname} {lname}" : $"{fname} {mname} {lname}";
-
-                        homeAddress = reader["HomeAddress"].ToString(); // We still grab this, but we don't use it
+                        ownerFullName = $"{reader["FirstName"]} {reader["MiddleName"]} {reader["LastName"]}";
+                        homeAddress = reader["HomeAddress"].ToString();
                         lblResidentName.Text = ownerFullName;
-
-                        lblResidentAddress.Text = ""; // Set to blank as requested
+                        lblResidentAddress.Text = "";
                     }
                 }
             }
@@ -259,7 +252,6 @@ namespace RECOMANAGESYS
             string unitNumber = selectedUnit.Item2;
             string block = selectedUnit.Item4;
 
-            // --- CHANGE 1: Set form label to ONLY unit and block ---
             lblResidentAddress.Text = $"Unit {unitNumber} Block {block}";
 
             UpdateUnitStatusLabel();
@@ -433,12 +425,8 @@ namespace RECOMANAGESYS
                             {
                                 while (reader.Read())
                                 {
-                                    // --- MIDDLE NAME FIX 2 (Applied) ---
-                                    string fname = reader["FirstName"].ToString();
-                                    string mname = reader["MiddleName"] == DBNull.Value ? "" : reader["MiddleName"].ToString();
-                                    string lname = reader["LastName"].ToString();
-                                    string fullName = string.IsNullOrWhiteSpace(mname) ? $"{fname} {lname}" : $"{fname} {mname} {lname}";
-                                    cmbNames.Items.Add(fullName);
+                                    string name = $"{reader["FirstName"]} {reader["MiddleName"]} {reader["LastName"]}";
+                                    cmbNames.Items.Add(name.Trim());
                                 }
                             }
                         }
@@ -610,20 +598,19 @@ namespace RECOMANAGESYS
                     monthCoveredForReceipt = $"{firstMonth} - {lastMonth}";
                 }
 
-                // --- CHANGE 2: Pass the correct address (Unit + Block only) to the receipt ---
                 var parameters = new ReportParameter[]
+
                 {
-                    new ReportParameter("txtResidentName", lblResidentName.Text),
-                    new ReportParameter("txtHomeownerID", txtHomeownerIDDisplay.Text),
-                    new ReportParameter("txtAddress", lblResidentAddress.Text), // This now correctly sends "Unit X Block Y"
-                    new ReportParameter("txtPayment", txtPaid.Text),
-                    new ReportParameter("txtChange", changeAmountForReport),
-                    new ReportParameter("txtAmountCovered", lblAmountPaid.Text),
-                    new ReportParameter("txtMonthCovered", monthCoveredForReceipt),
-                    new ReportParameter("txtRemarks", cmbRemarks.Text),
-                    new ReportParameter("txtDate", DateTime.Now.ToString("MMMM dd, yyyy, hh:mm tt")),
-                    new ReportParameter("txtOfficerName", CurrentUser.FullName),
-                    new ReportParameter("txtOfficerPosition", CurrentUser.Role)
+            new ReportParameter("txtResidentName", lblResidentName.Text),
+            new ReportParameter("txtHomeownerID", txtHomeownerIDDisplay.Text),
+            new ReportParameter("txtPayment", txtPaid.Text),
+            new ReportParameter("txtChange", changeAmountForReport),
+            new ReportParameter("txtAmountCovered", lblAmountPaid.Text),
+            new ReportParameter("txtMonthCovered", monthCoveredForReceipt),
+            new ReportParameter("txtRemarks", cmbRemarks.Text),
+            new ReportParameter("txtDate", DateTime.Now.ToString("MMMM dd, yyyy, hh:mm tt")),
+            new ReportParameter("txtOfficerName", CurrentUser.FullName),
+            new ReportParameter("txtOfficerPosition", CurrentUser.Role)
                 };
                 reportViewer.LocalReport.SetParameters(parameters);
                 reportViewer.RefreshReport();
